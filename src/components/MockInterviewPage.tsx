@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
+import { Badge } from "./ui/badge";
 import { 
   Brain,
   ArrowLeft,
@@ -9,7 +10,10 @@ import {
   Send,
   Loader2,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  Upload,
+  FileText,
+  X
 } from "lucide-react";
 import { Progress } from "./ui/progress";
 
@@ -25,13 +29,16 @@ interface Message {
 
 const interviewQuestions = [
   "Tell me about yourself and your background.",
-  "Why are you interested in this position?",
-  "What are your greatest strengths?",
-  "Can you describe a challenging project you worked on?",
+  "I see from your resume you worked as a Senior Software Engineer. Can you tell me about a challenging project from that role?",
+  "What technologies and skills from your resume are you most proud of?",
   "How do you handle conflict in a team?",
+  "Based on your experience, where do you see yourself in 5 years?",
 ];
 
 export function MockInterviewPage({ onNavigate }: MockInterviewPageProps) {
+  const [resumeUploaded, setResumeUploaded] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState("");
   const [isAiThinking, setIsAiThinking] = useState(false);
@@ -39,17 +46,40 @@ export function MockInterviewPage({ onNavigate }: MockInterviewPageProps) {
   const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
-    // Initial AI greeting
-    setTimeout(() => {
-      setMessages([
-        {
-          role: "ai",
-          content: "Hello! I'm your AI interview coach. I'll be conducting your mock interview today. We'll go through 5 questions. Take your time to think about each answer, and remember - there are no wrong answers in practice! Ready to begin?",
-          timestamp: new Date(),
-        },
-      ]);
-    }, 500);
-  }, []);
+    // Initial AI greeting after resume upload
+    if (resumeUploaded) {
+      setTimeout(() => {
+        setMessages([
+          {
+            role: "ai",
+            content: `Hello! I'm your AI interview coach. I've reviewed your resume and I'm impressed with your background! I'll be conducting your mock interview today based on your experience and skills.\n\nWe'll go through 5 personalized questions. Take your time to think about each answer, and remember - there are no wrong answers in practice!\n\nReady to begin?`,
+            timestamp: new Date(),
+          },
+        ]);
+      }, 500);
+    }
+  }, [resumeUploaded]);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    setUploadedFileName("Resume_AlexSmith.pdf");
+    setResumeUploaded(true);
+  };
+
+  const handleFileSelect = () => {
+    setUploadedFileName("Resume_AlexSmith.pdf");
+    setResumeUploaded(true);
+  };
 
   const handleStartInterview = () => {
     setIsAiThinking(true);
@@ -112,6 +142,121 @@ export function MockInterviewPage({ onNavigate }: MockInterviewPageProps) {
 
   const progress = messages.length > 2 ? (currentQuestionIndex / interviewQuestions.length) * 100 : 0;
 
+  // Show resume upload screen if not uploaded yet
+  if (!resumeUploaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-violet-50 to-purple-50">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" onClick={() => onNavigate("dashboard")}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Button>
+              <div className="w-px h-6 bg-gray-300" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <span>Upload Resume</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Upload Content */}
+        <div className="max-w-4xl mx-auto p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl mb-4">Before We Start...</h1>
+            <p className="text-xl text-gray-600">
+              Upload your resume so I can tailor interview questions to your experience
+            </p>
+          </div>
+
+          <Card
+            className={`p-12 border-2 border-dashed transition-all ${
+              isDragging
+                ? "border-violet-600 bg-violet-50"
+                : "border-gray-300 bg-white"
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <div className="text-center space-y-6">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 flex items-center justify-center mx-auto">
+                <Upload className="w-10 h-10 text-violet-600" />
+              </div>
+
+              <div>
+                <h3 className="text-2xl mb-2">Drag and drop your resume</h3>
+                <p className="text-gray-600">or click to browse from your device</p>
+              </div>
+
+              <div>
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700"
+                  onClick={handleFileSelect}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Select Resume
+                </Button>
+              </div>
+
+              <p className="text-sm text-gray-500">
+                Supports: PDF, DOC, DOCX • Max size: 10MB
+              </p>
+            </div>
+          </Card>
+
+          {/* Benefits */}
+          <div className="grid md:grid-cols-3 gap-6 mt-12">
+            <Card className="p-6 bg-white border-gray-200 text-center">
+              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mx-auto mb-4">
+                <Brain className="w-6 h-6 text-blue-600" />
+              </div>
+              <h3 className="text-lg mb-2">Personalized Questions</h3>
+              <p className="text-sm text-gray-600">
+                Get interview questions tailored to your specific experience and skills
+              </p>
+            </Card>
+
+            <Card className="p-6 bg-white border-gray-200 text-center">
+              <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-6 h-6 text-violet-600" />
+              </div>
+              <h3 className="text-lg mb-2">Relevant Scenarios</h3>
+              <p className="text-sm text-gray-600">
+                Practice with questions based on your actual job history and roles
+              </p>
+            </Card>
+
+            <Card className="p-6 bg-white border-gray-200 text-center">
+              <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="w-6 h-6 text-purple-600" />
+              </div>
+              <h3 className="text-lg mb-2">Better Feedback</h3>
+              <p className="text-sm text-gray-600">
+                Receive more accurate feedback by comparing answers to your background
+              </p>
+            </Card>
+          </div>
+
+          <div className="text-center mt-8">
+            <button
+              onClick={() => onNavigate("dashboard")}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Skip for now and use generic questions
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-violet-50 to-purple-50 flex flex-col">
       {/* Header */}
@@ -132,6 +277,12 @@ export function MockInterviewPage({ onNavigate }: MockInterviewPageProps) {
           </div>
           
           <div className="flex items-center gap-4">
+            {uploadedFileName && (
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                <FileText className="w-3 h-3 mr-1" />
+                {uploadedFileName}
+              </Badge>
+            )}
             <div className="text-right">
               <div className="text-sm text-gray-600">Progress</div>
               <div>{Math.round(progress)}%</div>

@@ -3,7 +3,6 @@ import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { 
   LayoutDashboard, 
-  FileText, 
   MessageSquare, 
   TrendingUp, 
   User, 
@@ -47,13 +46,6 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-50 to-violet-50 text-violet-700 transition-colors">
             <LayoutDashboard className="w-5 h-5" />
             <span>Dashboard</span>
-          </button>
-          <button 
-            onClick={() => onNavigate("resume")}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
-          >
-            <FileText className="w-5 h-5" />
-            <span>Resume Upload</span>
           </button>
           <button 
             onClick={() => onNavigate("interview")}
@@ -213,18 +205,6 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                 <div className="text-xs text-gray-500">Review past performances</div>
               </div>
             </Button>
-
-            <Button 
-              variant="outline" 
-              className="w-full justify-start h-auto py-4 bg-white"
-              onClick={() => onNavigate("resume")}
-            >
-              <FileText className="w-5 h-5 mr-3" />
-              <div className="text-left">
-                <div>Upload Resume</div>
-                <div className="text-xs text-gray-500">Analyze your skills</div>
-              </div>
-            </Button>
           </Card>
 
           {/* Current Goals */}
@@ -289,11 +269,11 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
 
               <div className="flex gap-3 p-3 rounded-lg bg-violet-50 border border-violet-100">
                 <div className="w-10 h-10 rounded-lg bg-violet-600 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5 text-white" />
+                  <MessageSquare className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="mb-1">Resume Updated</p>
-                  <p className="text-sm text-gray-600">New skills added • 1 day ago</p>
+                  <p className="mb-1">Behavioral Interview</p>
+                  <p className="text-sm text-gray-600">Score: 82% • 1 day ago</p>
                 </div>
               </div>
 

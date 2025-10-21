@@ -4,9 +4,8 @@ import { LoginPage } from "./components/LoginPage";
 import { DashboardPage } from "./components/DashboardPage";
 import { MockInterviewPage } from "./components/MockInterviewPage";
 import { FeedbackPage } from "./components/FeedbackPage";
-import { ResumeAnalysisPage } from "./components/ResumeAnalysisPage";
 
-type Page = "landing" | "login" | "dashboard" | "interview" | "feedback" | "resume";
+type Page = "landing" | "login" | "dashboard" | "interview" | "feedback";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("landing");
@@ -22,7 +21,6 @@ export default function App() {
       {currentPage === "dashboard" && <DashboardPage onNavigate={handleNavigate} />}
       {currentPage === "interview" && <MockInterviewPage onNavigate={handleNavigate} />}
       {currentPage === "feedback" && <FeedbackPage onNavigate={handleNavigate} />}
-      {currentPage === "resume" && <ResumeAnalysisPage onNavigate={handleNavigate} />}
     </div>
   );
 }
