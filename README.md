@@ -1,6 +1,6 @@
 # 🤖 AI-Powered Mock Interview Bot
 
-## This projectc is live [here] (https://ai-powered-mock-interview-bot.vercel.app/).
+## This projectc is live [here](https://ai-powered-mock-interview-bot.vercel.app/).
 
 An **AI-driven web application** that simulates real interview sessions using intelligent question generation and real-time feedback.  
 Built to help students and job seekers **practice interviews**, **analyze performance**, and **boost confidence** through personalized AI insights.
