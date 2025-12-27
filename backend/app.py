@@ -68,6 +68,14 @@ def extract_keywords_keybert(chunks, top_n=5):
     # remove duplicates
     return list(dict.fromkeys(keywords))
 
+def clean_llm_output(text):
+    return [
+        s.strip().lower()
+        for s in text.replace("\n", "").split(",")
+        if len(s.strip()) > 2
+    ]
+
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
@@ -104,23 +112,20 @@ def analyze_resume():
     chunks = chunk_text(text)
     print("📦 Total chunks:", len(chunks))
 
-    raw_keywords = extract_keywords_keybert(chunks, top_n=5)
+    # combine chunks to reduce KeyBERT calls (performance optimization)
+    combined_text = " ".join(chunks[:3])
+
+    raw_keywords = extract_keywords_keybert([combined_text], top_n=15)
 
     print("🧠 KeyBERT keywords:", raw_keywords)
-
     print("🧠 Total unique raw keywords:", len(raw_keywords))
-    print(raw_keywords)
 
-
-    # call LLM to refine skills (keeps existing behavior)
-    refined_text = refine_skills(raw_keywords)
-
-# clean LLM output
-    refined_skills = [
-    s.strip().lower()
-    for s in refined_text.replace("\n", "").split(",")
-    if len(s.strip()) > 2 and "here is" not in s.lower()
-    ]
+# decide whether to use LLM or not
+    if len(raw_keywords) > 10:
+       refined_skills = raw_keywords
+    else:
+       refined_text = refine_skills(raw_keywords)
+       refined_skills = clean_llm_output(refined_text)
 
     # also include a short snippet of extracted text for verification
     snippet = text[:1000]
