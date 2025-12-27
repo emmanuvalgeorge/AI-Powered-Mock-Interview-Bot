@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -24,6 +24,33 @@ interface ResumeAnalysisPageProps {
 export function ResumeAnalysisPage({ onNavigate }: ResumeAnalysisPageProps) {
   const [isUploaded, setIsUploaded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadResume = async (file: File) => {
+    const formData = new FormData();
+    formData.append("resume", file);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/resume/analyze",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to analyze resume");
+      }
+
+      const data = await response.json();
+      console.log("Extracted skills:", data.skills);
+
+    // later: store in state and render nicely
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -37,7 +64,12 @@ export function ResumeAnalysisPage({ onNavigate }: ResumeAnalysisPageProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    setIsUploaded(true);
+
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      uploadResume(file);
+      setIsUploaded(true);
+    }
   };
 
   const handleFileSelect = () => {
@@ -98,10 +130,23 @@ export function ResumeAnalysisPage({ onNavigate }: ResumeAnalysisPageProps) {
                 </div>
 
                 <div>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      uploadResume(e.target.files[0]);
+                      setIsUploaded(true);
+                    }
+                    e.target.value = "";
+                  }}
+                  />
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700"
-                    onClick={handleFileSelect}
+                    onClick={() => fileInputRef.current?.click()}
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     Select File
