@@ -39,6 +39,25 @@ def health():
     return jsonify({"status": "ok"})
 
 
+# ---------- Simple keyword extraction (local fallback) ----------
+def extract_keywords_from_text(text, top_n=10):
+    import re
+    from collections import Counter
+
+    # very small stopword list for demo
+    stopwords = set([
+        "the", "and", "for", "with", "that", "this", "your", "you",
+        "from", "have", "has", "are", "a", "an", "in", "on", "of",
+        "to", "as", "is", "it", "by",
+    ])
+
+    tokens = re.findall(r"\b[a-zA-Z0-9+#.+-]{3,}\b", text.lower())
+    tokens = [t for t in tokens if t not in stopwords and not t.isdigit()]
+    counts = Counter(tokens)
+    keywords = [w for w, _ in counts.most_common(top_n)]
+    return keywords
+
+
 
 @app.route("/api/resume/analyze", methods=["POST"])
 def analyze_resume():
@@ -48,13 +67,19 @@ def analyze_resume():
     resume = request.files["resume"]
     text = extract_text_from_pdf(resume)
 
-    # TEMP: demo keywords (later replace with ML + KeyBERT)
-    raw_keywords = ["sql servers", "oracle tutorials", "database administration"]
+    # extract simple keywords locally as a quick demo
+    raw_keywords = extract_keywords_from_text(text, top_n=12)
 
+    # call LLM to refine skills (keeps existing behavior)
     refined = refine_skills(raw_keywords)
 
+    # also include a short snippet of extracted text for verification
+    snippet = text[:1000]
+
     return jsonify({
-        "skills": refined.split(",")
+        "skills": [s.strip() for s in refined.split(",") if s.strip()],
+        "raw_keywords": raw_keywords,
+        "text_snippet": snippet
     })
 
 

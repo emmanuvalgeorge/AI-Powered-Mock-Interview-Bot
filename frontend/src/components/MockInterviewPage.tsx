@@ -69,15 +69,47 @@ export function MockInterviewPage({ onNavigate }: MockInterviewPageProps) {
     setIsDragging(false);
   };
 
+  const analyzeFile = async (file: File) => {
+    setUploadedFileName(file.name);
+    console.log("Uploading resume for analysis:", file.name);
+
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+
+      const res = await fetch("http://localhost:5000/api/resume/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        console.error("Resume analysis error:", err);
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Extracted raw keywords:", data.raw_keywords);
+      console.log("Refined skills:", data.skills);
+      console.log("Text snippet:", data.text_snippet);
+
+      // now reveal the mock interview flow
+      setResumeUploaded(true);
+    } catch (err) {
+      console.error("Error uploading resume:", err);
+    }
+  };
+
+ 
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
     if (file) {
-      setUploadedFileName(file.name);
-      setResumeUploaded(true);
+      analyzeFile(file);
     }
-  }; 
+  };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -88,8 +120,7 @@ export function MockInterviewPage({ onNavigate }: MockInterviewPageProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploadedFileName(file.name);
-    setResumeUploaded(true);
+    analyzeFile(file);
   }; 
 
   const handleStartInterview = () => {
