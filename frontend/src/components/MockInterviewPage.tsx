@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
@@ -72,14 +72,25 @@ export function MockInterviewPage({ onNavigate }: MockInterviewPageProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    setUploadedFileName("Resume_AlexSmith.pdf");
-    setResumeUploaded(true);
-  };
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      setUploadedFileName(file.name);
+      setResumeUploaded(true);
+    }
+  }; 
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileSelect = () => {
-    setUploadedFileName("Resume_AlexSmith.pdf");
-    setResumeUploaded(true);
+    fileInputRef.current?.click();
   };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadedFileName(file.name);
+    setResumeUploaded(true);
+  }; 
 
   const handleStartInterview = () => {
     setIsAiThinking(true);
@@ -203,6 +214,13 @@ export function MockInterviewPage({ onNavigate }: MockInterviewPageProps) {
                   <Upload className="w-4 h-4 mr-2" />
                   Select Resume
                 </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
               </div>
 
               <p className="text-sm text-gray-500">
