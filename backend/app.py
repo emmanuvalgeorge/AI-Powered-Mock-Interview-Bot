@@ -120,9 +120,17 @@ def analyze_resume():
     print("🧠 KeyBERT keywords:", raw_keywords)
     print("🧠 Total unique raw keywords:", len(raw_keywords))
 
-    # always refine, but limit keywords sent to LLM
-    refined_text = refine_skills(raw_keywords[:8])
-    refined_skills = clean_llm_output(refined_text)
+    # decide whether to use LLM or not
+    if len(raw_keywords) > 10:
+       refined_skills = raw_keywords
+    else:
+       refined_text = refine_skills(raw_keywords[:8])
+       refined_skills = clean_llm_output(refined_text)
+
+    #to use llm(system heavy)
+    #refined_text = refine_skills(raw_keywords[:8])
+    #refined_skills = clean_llm_output(refined_text)
+    
     # also include a short snippet of extracted text for verification
     snippet = text[:1000]
 
